@@ -19,15 +19,8 @@ Create docker image using Dockerfile
 
 
 ```docker
-docker build -t dockerhandson/spring-boot-mongo .
+docker build -t prasenforu/spring-boot-mongo .
 ```
-
-## Deploy Application Using Docker Compose 
-
-```docker-compose 
-docker-compose up -d 
-```
-
 ## List Docker Containers
 ```docker
 docker ps -a
