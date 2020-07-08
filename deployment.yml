@@ -1,0 +1,105 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    name: mongo
+  name: mongo
+spec:
+  type: ClusterIP
+  ports:
+    - port: 27017
+      targetPort: 27017
+  selector:
+    name: mongo
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    name: mongo
+  name: mongo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: mongo
+  template:
+    metadata:
+      labels:
+        name: mongo
+    spec:
+      volumes:
+      - name: mongo-persistent-storage
+        hostPath:
+         path: /tmp/dbbackup
+      containers:
+      - name: mongo
+        image: mongo
+        ports:
+        - name: mongo
+          containerPort: 27017
+          hostPort: 27017
+        volumeMounts:
+        - name: mongo-persistent-storage
+          mountPath: /data/db
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    name: springboot
+  name: springboot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: springboot
+  template:
+    metadata:
+      labels:
+        name: springboot
+    spec:
+      containers:
+      - name: springboot
+        image: 10.128.0.26:9000/prasencicd/spring-boot-mongo-docker
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+        env:
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: POD_UID
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.uid
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: HOST_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.hostIP 
+        - name: KUBEENVIROMENT
+          value: kubeenv        
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    name: springboot
+  name: springboot
+spec:
+  type: NodePort
+  ports:
+    - port: 8080
+      targetPort: 8080
+  selector:
+    name: springboot
+

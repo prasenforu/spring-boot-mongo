@@ -1,0 +1,14 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  labels:
+    name: springboot
+  name: springboot
+spec:
+  rules:
+    - host: springboot.stagapps.cloud-cafe.tk
+      http:
+        paths:
+          - backend:
+              serviceName: springboot
+              servicePort: 8080
